@@ -1,0 +1,19 @@
+l = []
+p_list = []
+for i in range(20):
+    l.append(map(int, raw_input().split(" ")))
+for i in range(20):
+    for j in range(20):
+        if j+3 < 20:
+            p_right = l[i][j]*l[i][j+1]*l[i][j+2]*l[i][j+3]
+            p_list.append(p_right)
+        if i+3 < 20:
+            p_down = l[i][j]*l[i+1][j]*l[i+2][j]*l[i+3][j]
+            p_list.append(p_down)
+        if i+3 < 20 and j+3 < 20:
+            p_d_right = l[i][j] * l[i+1][j+1] * l[i+2][j+2] * l[i+3][j+3]
+            p_list.append(p_d_right)
+        if i-3 >= 0 and j+3 < 20:
+            p_d_left = l[i][j] * l[i-1][j+1] * l[i-2][j+2] * l[i-3][j+3]
+            p_list.append(p_d_left)
+print max(p_list)

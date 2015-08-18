@@ -1,0 +1,42 @@
+import itertools
+def get_primes(n):
+    numbers = set(range(n, 1, -1))
+    primes = []
+    while numbers:
+        p = numbers.pop()
+        primes.append(p)
+        numbers.difference_update(set(range(p*2, n+1, p)))
+    return primes
+
+def rotate(n):
+    rotlist = []
+    m = str(n)
+    counter = 0
+    while counter < len(str(n)):
+        m = m[1:] + m[0]
+        rotlist.append(int(m))
+        counter += 1
+    return rotlist
+
+def iscircularprime(n):
+    np = [0,2,4,5,6,8]
+    y = str(n)
+    for j in y:
+        if int(j) in np:
+            return False
+    if n not in primes:
+        return False
+    m = rotate(n)
+    #print "rotate of ",n,"is ",m
+    for i in m:
+        if i not in primes:
+            return False
+    return True
+
+n = int(raw_input())
+primes = get_primes(n)
+s = 0
+for i in primes:
+    if iscircularprime(i):
+        s = s + i
+print s+7

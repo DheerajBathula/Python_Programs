@@ -1,0 +1,15 @@
+t = int(raw_input())
+l = []
+d = {}
+for i in range(t):
+    l.append(int(raw_input()))
+max_n = max(l)
+mul = 1
+for i in range(1,max_n+1):
+    d[i] = i * mul
+    mul = d[i]
+for i in l:
+    if i == 0:
+        print 1
+    else:
+        print sum(map(int,list(str(d[i]))))

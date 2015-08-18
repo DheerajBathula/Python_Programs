@@ -1,0 +1,10 @@
+n = int(raw_input())
+fact = [1,1,2,6,24,120,720,5040,40320,362880]
+f = 0
+for i in range(10,n+1):
+    s = 0
+    for j in str(i):
+        s = s + fact[int(j)]
+    if s%i == 0:
+        f = f + i
+print f

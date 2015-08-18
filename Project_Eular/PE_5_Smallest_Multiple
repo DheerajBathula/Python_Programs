@@ -1,0 +1,23 @@
+# Enter your code here. Read input from STDIN. Print output to STDOUT
+def get_primes(n):
+    numbers = set(range(n, 1, -1))
+    primes = []
+    while numbers:
+        p = numbers.pop()
+        primes.append(p)
+        numbers.difference_update(set(range(p*2, n+1, p)))
+    return primes
+
+t = int(raw_input())
+for i in range(t):
+    n = int(raw_input())
+    primes = get_primes(n)
+    product = 1
+    prime_fact = [4,8,16,32,9,27,25,49]
+    prime_ind = [2,2,2,2,3,3,5,9]
+    for j in range(n+1):
+        if j in primes:
+            product =  product * j
+        elif j in prime_fact:
+            product = product * prime_ind[prime_fact.index(j)]
+    print product

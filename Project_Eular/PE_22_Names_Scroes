@@ -1,0 +1,17 @@
+n = int(raw_input())
+names = []
+f_list = []
+for i in range(n):
+    names.append(raw_input())
+s_names = sorted(names)
+for name in s_names:
+    l = list(name)
+    add = 0
+    for x in l:
+        add = add + ord(x)%64
+    final = add * (s_names.index(name)+1)
+    f_list.append(final)
+t = int(raw_input())
+for i in range(t):
+    name = raw_input()
+    print f_list[s_names.index(name)]

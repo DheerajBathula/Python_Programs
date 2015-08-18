@@ -1,0 +1,15 @@
+# Enter your code here. Read input from STDIN. Print output to STDOUT
+import bisect
+t = int(raw_input())
+max_arr = []
+for i in range(100,1000):
+        for j in range(100,1000):
+            x = i * j
+            str_x = str(x)
+            if str_x == str_x[::-1]:
+                max_arr.append(x)
+sort_arr = sorted(max_arr)
+for a in range(t):
+    n = int(raw_input())
+    index = bisect.bisect(sort_arr, n) 
+    print sort_arr[index-1]

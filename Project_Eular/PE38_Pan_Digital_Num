@@ -1,0 +1,23 @@
+n = map(int,raw_input().split())
+if n[1] == 9:
+    pan_check = [str(i) for i in range(1, 10)]
+    digits = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+if n[1] == 8:
+    pan_check = [str(i) for i in range(1, 9)]
+    digits = [1, 2, 3, 4, 5, 6, 7, 8]
+l = []
+for i in range(2, n[0]):
+    concat = ''
+    for j in digits:
+        concat += str(i * j)
+        # Adding each consecutive product to the string
+        if len(concat) == n[1]:
+            for k in pan_check:
+                occurance = concat.count(k)
+                if occurance != 1:
+                    break
+            else:
+                l.append(i)
+                break
+for i in sorted(l):
+    print i

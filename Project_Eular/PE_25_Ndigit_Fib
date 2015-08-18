@@ -1,0 +1,17 @@
+import bisect
+t = int(raw_input())
+li = []
+for i in range(t):
+    n = int(raw_input())
+    li.append(n)
+    
+val = 10**(max(li)-1)
+l = [0,1]
+i = 2
+while l[-1] < val:
+    l.append(l[i-1] + l[i-2])
+    i = i + 1
+for j in li:
+    val = 10**(j-1)
+    index = bisect.bisect(l,val)
+    print index

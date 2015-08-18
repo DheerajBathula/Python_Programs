@@ -1,0 +1,12 @@
+# Enter your code here. Read input from STDIN. Print output to STDOUT
+t = int(raw_input())
+for i in range(t):
+    n = int(raw_input())
+    tri = []
+    for j in range(n):
+        tri.append(map(int,raw_input().split()))        
+    while len(tri) > 1:
+        t0 = tri.pop()
+        t1 = tri.pop()
+        tri.append([max(t0[i], t0[i+1]) + t for i,t in enumerate(t1)])
+    print tri[0][0]

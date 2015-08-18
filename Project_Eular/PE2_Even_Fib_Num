@@ -1,0 +1,15 @@
+import bisect
+fibs = [0, 1]
+fibs_even = []
+for i in range(2, 40000):
+    x = fibs[-1] + fibs[-2]
+    fibs.append(x)
+    if x%2 == 0:
+        fibs_even.append(x)
+
+t = int(raw_input())
+l = []
+for i in range(t):
+    n = int(raw_input())
+    index = bisect.bisect(fibs_even,n)
+    print sum(fibs_even[0:index])

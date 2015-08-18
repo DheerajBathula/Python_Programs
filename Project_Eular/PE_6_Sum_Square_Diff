@@ -1,0 +1,7 @@
+t = int(raw_input())
+for i in range(t):
+    n = int(raw_input())
+    n_sum = n*(n+1)/2
+    n_sum_2 = n_sum * n_sum
+    n_sq_sum = n*(n+1)*((2*n)+1)/6
+    print abs(n_sum_2 - n_sq_sum)

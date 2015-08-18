@@ -1,0 +1,43 @@
+# Enter your code here. Read input from STDIN. Print output to STDOUT
+t = int(raw_input())
+l = []
+l_40_50 = []
+l_30_40 = []
+l_20_30 = []
+m_10_20 = []
+f_0_10 = []
+for i in range(t):
+    n = raw_input()
+    l.append(n)
+    l_40_50.append(int(n[40:50]))
+    l_30_40.append(int(n[30:40]))
+    l_20_30.append(int(n[20:30]))
+    m_10_20.append(int(n[10:20]))
+    f_0_10.append(int(n[0:10]))
+    
+sum_l_40_50 = sum(l_40_50)
+len_l_40_50 = len(str(sum_l_40_50)) - 10
+prec = str(sum_l_40_50)[0:len_l_40_50]
+if prec != '':
+    l_30_40.append(int(prec))
+    
+sum_l_30_40 = sum(l_30_40)
+len_l_30_40 = len(str(sum_l_30_40)) - 10
+prec = str(sum_l_30_40)[0:len_l_30_40]
+if prec != '':
+    l_20_30.append(int(prec))
+    
+sum_l_20_30 = sum(l_20_30)
+len_l_30_40 = len(str(sum_l_20_30)) - 10
+prec = str(sum_l_20_30)[0:len_l_30_40]
+if prec != '':
+    m_10_20.append(int(prec))
+    
+sum_m_10_20 = sum(m_10_20)
+len_m_10_20 = len(str(sum_m_10_20)) - 10
+prec = str(sum_m_10_20)[0:len_m_10_20]
+if prec != '':
+    f_0_10.append(int(prec))
+    
+sum_f_0_10 = sum(f_0_10)
+print str(sum_f_0_10)[0:10]
