@@ -79,9 +79,9 @@
         "subnetRef": "[concat(variables('vnetID'),'/subnets/')]",
         "imageOffer": "UbuntuServer",
         "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
-        "nic1Name": "nic1",
-        "nic2Name": "nic2",
-        "nic3Name": "nic3",
+        "nic1Name": "[concat('nic1',parameters('vmName'))]",
+        "nic2Name": "[concat('nic2',parameters('vmName'))]",
+        "nic3Name": "[concat('nic3',parameters('vmName'))]",
         "vnetName": "[parameters('vmName')]",
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
         "addressPrefix": "10.0.0.0/16",
@@ -97,8 +97,10 @@
         "subnet3Id": "[concat(variables('vnetId'), '/subnets/', variables('subnet1Name'))]",
         "subnet3Prefix": "10.0.3.0/24",
         "subnet3PrivateAddress": "10.0.3.5",
-        "publicIPAddressName": "[concat(uniquestring(resourceGroup().id), 'PublicIp')]",
-        "publicIPAddressType": "Dynamic"
+        "publicIPAddressName": "[concat(parameters('vmName'), 'PublicIp')]",
+        "publicIPAddressType": "Dynamic",
+		"dataDisk1VhdName": "[concat('https://teradataimagestore.blob.core.windows.net/vhds/',parameters('vmName'),'dataDisk1')]",
+        "dataDisk2VhdName": "[concat('https://teradataimagestore.blob.core.windows.net/vhds/',parameters('vmName'),'dataDisk2')]"
     },
     "resources": [
         {
@@ -303,7 +305,27 @@
                         "vhd": {
                             "uri": "[concat('https://teradataimagestore.blob.core.windows.net/vhds/', parameters('vmName'),copyIndex(),'.vhd')]"
                         }
-                    }
+                    },
+					"dataDisks": [
+                        {
+                            "name": "[concat('datadisk1',copyIndex())]",
+                            "diskSizeGB": "256",
+                            "lun": 0,
+                            "vhd": {
+                                "Uri": "[concat(variables('dataDisk1VhdName'),copyIndex(),'.vhd')]"
+                            },
+                            "createOption": "Empty"
+                        },
+                        {
+                            "name": "[concat('datadisk2',copyIndex())]",
+                            "diskSizeGB": "256",
+                            "lun": 1,
+                            "vhd": {
+                                "Uri": "[concat(variables('dataDisk2VhdName'),copyIndex(),'.vhd')]"
+                            },
+                            "createOption": "Empty"
+                        }
+                    ]
                 }
             },
             "dependsOn": [
