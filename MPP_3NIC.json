@@ -1,0 +1,323 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "defaultValue": "azureuser",
+            "type": "String",
+            "metadata": {
+                "description": "User name for the Virtual Machine."
+            }
+        },
+        "adminPassword": {
+            "type": "SecureString",
+            "metadata": {
+                "description": "Password for the Virtual Machine."
+            }
+        },
+        "dnsLabelPrefix": {
+            "defaultValue": "multinicvm",
+            "type": "String",
+            "metadata": {
+                "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+            }
+        },
+        "vmName": {
+            "defaultValue": "multinicvm",
+            "type": "String",
+            "metadata": {
+                "description": "Name of the VM"
+            }
+        },
+        "vmCount": {
+            "defaultValue": 1,
+            "type": "Int",
+            "metadata": {
+                "description": "Number of VMs to create"
+            }
+        },
+        "vmSize": {
+            "defaultValue": "Standard_D2",
+            "allowedValues": [
+                "Standard_A2",
+                "Standard_A3",
+                "Standard_A4",
+                "Standard_A6",
+                "Standard_A7",
+                "Standard_A8",
+                "Standard_A9",
+                "Standard_A10",
+                "Standard_A11",
+                "Standard_D2",
+                "Standard_D3",
+                "Standard_D4",
+                "Standard_D11",
+                "Standard_D12",
+                "Standard_D13",
+                "Standard_D14",
+                "Standard_D2_v2",
+                "Standard_D3_v2",
+                "Standard_D4_v2",
+                "Standard_D5_v2",
+                "Standard_D12_v2",
+                "Standard_D13_v2",
+                "Standard_D14_v2",
+                "Standard_D15_v2"
+            ],
+            "type": "String",
+            "metadata": {
+                "description": "Size of the VM"
+            }
+        }
+    },
+    "variables": {
+        "apiVersion": "2015-06-15",
+        "location": "[resourceGroup().location]",
+        "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'samultinic')]",
+        "storageAccountType": "Standard_LRS",
+        "imagePublisher": "Canonical",
+        "subnetRef": "[concat(variables('vnetID'),'/subnets/')]",
+        "imageOffer": "UbuntuServer",
+        "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
+        "nic1Name": "nic1",
+        "nic2Name": "nic2",
+        "nic3Name": "nic3",
+        "vnetName": "[parameters('vmName')]",
+        "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+        "addressPrefix": "10.0.0.0/16",
+        "subnet1Name": "Frontend",
+        "subnet1Id": "[concat(variables('vnetId'), '/subnets/', variables('subnet1Name'))]",
+        "subnet1Prefix": "10.0.1.0/24",
+        "subnet1PrivateAddress": "10.0.1.5",
+        "subnet2Name": "Web",
+        "subnet2Id": "[concat(variables('vnetId'), '/subnets/', variables('subnet2Name'))]",
+        "subnet2Prefix": "10.0.2.0/24",
+        "subnet2PrivateAddress": "10.0.2.5",
+        "subnet3Name": "third",
+        "subnet3Id": "[concat(variables('vnetId'), '/subnets/', variables('subnet1Name'))]",
+        "subnet3Prefix": "10.0.3.0/24",
+        "subnet3PrivateAddress": "10.0.3.5",
+        "publicIPAddressName": "[concat(uniquestring(resourceGroup().id), 'PublicIp')]",
+        "publicIPAddressType": "Dynamic"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('storageAccountName')]",
+            "apiVersion": "[variables('apiVersion')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "accountType": "[variables('storageAccountType')]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "name": "[variables('vnetName')]",
+            "apiVersion": "[variables('apiVersion')]",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "[variables('addressPrefix')]"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "[variables('subnet1Name')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnet1Prefix')]"
+                        }
+                    },
+                    {
+                        "name": "[variables('subnet2Name')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnet2Prefix')]"
+                        }
+                    },
+                    {
+                        "name": "[variables('subnet3Name')]",
+                        "properties": {
+                            "addressPrefix": "[variables('subnet3Prefix')]"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Network/publicIPAddresses",
+            "name": "[concat(variables('publicIPAddressName'),copyIndex())]",
+            "apiVersion": "[variables('apiVersion')]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "publicnetCopy",
+                "count": "[parameters('vmCount')]"
+            },
+            "properties": {
+                "dnsSettings": {
+                    "domainNameLabel": "[concat(parameters('vmName'),copyIndex())]"
+                },
+                "idleTimeoutInMinutes": 30,
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('nic1Name'),copyIndex())]",
+            "apiVersion": "[variables('apiVersion')]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "nicCopy",
+                "count": "[parameters('vmCount')]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAddress": "[variables('subnet1PrivateAddress')]",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('publicIPAddressName'),copyIndex()))]"
+                            },
+                            "subnet": {
+                                "id": "[concat(variables('subnetRef'),variables('subnet1Name'))]"
+                            }
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[variables('vnetId')]",
+                "[concat(variables('publicIPAddressName'),copyIndex())]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('nic2Name'),copyIndex())]",
+            "apiVersion": "[variables('apiVersion')]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "nicCopy",
+                "count": "[parameters('vmCount')]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig2",
+                        "properties": {
+                            "privateIPAddress": "[variables('subnet2PrivateAddress')]",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[concat(variables('subnetRef'),variables('subnet2Name'))]"
+                            }
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[variables('vnetId')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('nic3Name'),copyIndex())]",
+            "apiVersion": "[variables('apiVersion')]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "nicCopy",
+                "count": "[parameters('vmCount')]"
+            },
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig3",
+                        "properties": {
+                            "privateIPAddress": "[variables('subnet3PrivateAddress')]",
+                            "privateIPAllocationMethod": "Dynamic",
+                            "subnet": {
+                                "id": "[concat(variables('subnetRef'),variables('subnet3Name'))]"
+                            }
+                        }
+                    }
+                ]
+            },
+            "dependsOn": [
+                "[variables('vnetId')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[concat(parameters('vmName'),copyIndex())]",
+            "apiVersion": "[variables('apiVersion')]",
+            "location": "[resourceGroup().location]",
+            "copy": {
+                "name": "nodeCopy",
+                "count": "[parameters('vmCount')]"
+            },
+            "properties": {
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": "true",
+                        "storageUri": "[concat('http://', variables('storageAccountName'), '.blob.core.windows.net')]"
+                    }
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('nic1Name'),copyIndex()))]",
+                            "properties": {
+                                "primary": true
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('nic2Name'),copyIndex()))]",
+                            "properties": {
+                                "primary": false
+                            }
+                        },
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(variables('nic3Name'),copyIndex()))]",
+                            "properties": {
+                                "primary": false
+                            }
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "osDisk": {
+                        "caching": "ReadWrite",
+                        "osType": "Linux",
+                        "createOption": "FromImage",
+                        "name": "osdisk",
+                        "image": {
+                            "uri": "https://teradataimagestore.blob.core.windows.net/images/TD350v2.vhd"
+                        },
+                        "vhd": {
+                            "uri": "[concat('https://teradataimagestore.blob.core.windows.net/vhds/', parameters('vmName'),copyIndex(),'.vhd')]"
+                        }
+                    }
+                }
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', concat(variables('nic1Name'),copyIndex()))]",
+                "[concat('Microsoft.Network/networkInterfaces/', concat(variables('nic2Name'),copyIndex()))]",
+                "[concat('Microsoft.Network/networkInterfaces/', concat(variables('nic3Name'),copyIndex()))]"
+            ]
+        }
+    ],
+    "outputs": {
+        "sshCommand": {
+            "type": "String",
+            "value": "[concat('ssh ', parameters('adminUsername'), '@', parameters('vmName'), '.', resourceGroup().location, '.cloudapp.azure.com')]"
+        }
+    }
+}
