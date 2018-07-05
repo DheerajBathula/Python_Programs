@@ -23,7 +23,7 @@
   "resources": [
     {
       "apiVersion": "2016-07-01",
-      "name": "[variables('RBACResourceName')]",
+      "name": "dheeraj",
       "type": "Microsoft.Authorization/roleAssignments",
       "properties": {
         "roleDefinitionId": "[variables('owner')]",
